@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="UMI-Prior transfers native UMI manipulation skills to humanoid whole-body manipulation through real-time motion generation.">
+  <meta name="keywords" content="Robotics, Humanoid, UMI, Whole-body Manipulation, Motion Generation">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1020">
+  <meta property="og:title" content="UMI-Prior">
+  <meta property="og:description" content="Transfer UMI manipulation skill to humanoid whole-body manipulation via real-time motion generation.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="./static/images/umi-prior/teaser.png">
+  <title>UMI-Prior: UMI Skill Transfer to Humanoid Whole-Body Manipulation</title>
+  <link rel="icon" href="./static/images/umi-prior/favicon.svg" type="image/svg+xml">
+
+  <link rel="stylesheet" href="./static/css/index.css">
+  <script defer src="./static/js/index.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="hero is-link is-fullheight project-hero" id="top">
+    <div class="hero-video" aria-hidden="true">
+      <video autoplay muted loop playsinline preload="none"
+        data-mobile-poster="./static/images/umi-prior/teaser-mobile.avif"
+        data-desktop-poster="./static/images/umi-prior/teaser-desktop.avif"
+        data-mobile-src="./static/videos/hero-shelf-mobile-small.m4v"
+        data-desktop-src="./static/videos/hero-shelf.m4v"></video>
+    </div>
+    <div class="overlay"></div>
+
+    <div class="hero-head">
+      <nav class="navbar" aria-label="Project resources">
+        <div class="container is-max-widescreen">
+          <div class="navbar-menu is-active">
+            <div class="navbar-end">
+              <a class="navbar-item" href="./static/UMI-Prior.pdf">
+                <span class="icon"><img src="./static/images/pdf.svg" width="18" height="18" alt=""></span>
+                <span>Paper</span>
+              </a>
+              <a class="navbar-item" href="#system">
+                <span>Method</span>
+              </a>
+              <a class="navbar-item" href="#transfer">
+                <span>Experiments</span>
+              </a>
+              <span class="navbar-item">
+                <a class="resource-button button is-inverted" href="#citation">
+                  <span>BibTeX</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <div class="hero-body">
+      <div class="hero-content">
+        <h1 class="project-title">UMI-Prior</h1>
+        <p class="project-subtitle">
+          Transfer UMI Manipulation Skill to Humanoid Whole-Body Manipulation via Real-Time Motion Generation
+        </p>
+        <p class="project-venue">ICRA 2027 Submission &middot; Anonymous Authors</p>
+        <div class="publication-links">
+          <a class="resource-button button is-dark" href="./static/UMI-Prior.pdf">
+            <span class="icon"><img src="./static/images/pdf.svg" width="18" height="18" alt=""></span>
+            <span>Paper</span>
+          </a>
+          <a class="resource-button button is-dark" href="#system">
+            <span>Method</span>
+          </a>
+          <a class="resource-button button is-dark" href="#transfer">
+            <span>Experiments</span>
+          </a>
+          <a class="resource-button button is-dark" href="#citation">
+            <span>BibTeX</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-foot">
+      <nav class="tabs is-fullwidth anchor-tabs" aria-label="Project sections">
+        <ul>
+          <li><a href="#overview">Why UMI-Prior</a></li>
+          <li><a href="#system">System</a></li>
+          <li><a href="#motion-prior">Motion Prior</a></li>
+          <li><a href="#transfer">Robot Transfer</a></li>
+          <li><a href="#citation">Citation</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <nav class="document-nav" aria-label="Sticky project sections">
+    <div class="container is-max-widescreen">
+      <div class="tabs is-fullwidth anchor-tabs">
+        <ul>
+          <li><a href="#overview">Why UMI-Prior</a></li>
+          <li><a href="#system">System</a></li>
+          <li><a href="#motion-prior">Motion Prior</a></li>
+          <li><a href="#transfer">Robot Transfer</a></li>
+          <li><a href="#citation">Citation</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main-content">
+    <section class="section-shell is-compact" id="overview">
+      <div class="editorial-container">
+        <p class="overview-lead">
+          Humanoid loco-manipulation needs task-specific demonstrations and whole-body coordination, yet collecting both is costly. UMI gives us a practical, task-centric end-effector interface, but it does not say how a high-DoF humanoid should coordinate its torso, legs, and balance.
+        </p>
+        <p class="overview-lead">
+          <strong>UMI-Prior fills in the body.</strong> It converts native bimanual UMI trajectories into coordinated whole-body references using a task-agnostic generator trained on independent motion-capture data, with no body trackers and no paired UMI/whole-body demonstrations.
+        </p>
+      </div>
+    </section>
+
+    <section class="section-shell is-compact is-mist" aria-labelledby="teaser-title">
+      <div class="wide-container">
+        <div class="section-heading">
+          <p class="section-kicker">One interface, four tasks</p>
+          <h2 class="section-title" id="teaser-title">UMI skills, now with a humanoid body</h2>
+          <p class="section-deck">The same EE-only demonstration interface drives drawer closing, shelf pick-and-place, ball toss, and locomotion-plus-manipulation.</p>
+        </div>
+        <figure class="media-frame is-technical">
+          <a class="vector-figure-link" href="./static/images/umi-prior/teaser.svg" target="_blank" rel="noopener" aria-label="Open full-size SVG: UMI-Prior task overview (opens in a new tab)">
+            <img src="./static/images/umi-prior/teaser.svg" width="510" height="198" loading="lazy" decoding="async" alt="UMI-Prior demonstrations across four humanoid manipulation tasks">
+            <span class="vector-figure-action">Open full-size SVG</span>
+          </a>
+          <figcaption>Human-collected UMI trajectories are converted into whole-body motion references and executed by a real 29-DoF G1 humanoid.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section-shell is-night" id="system" aria-labelledby="system-title">
+      <div class="wide-container">
+        <div class="section-heading">
+          <p class="section-kicker">Closed-loop hierarchy</p>
+          <h2 class="section-title" id="system-title">From pixels to whole-body control</h2>
+          <p class="section-deck">Three independently useful layers meet through explicit, inspectable trajectory and motion-reference interfaces.</p>
+        </div>
+        <figure class="media-frame is-technical">
+          <a class="vector-figure-link" href="./static/images/umi-prior/system-pipeline.svg" target="_blank" rel="noopener" aria-label="Open full-size SVG: closed-loop system pipeline (opens in a new tab)">
+            <img src="./static/images/umi-prior/system-pipeline.svg" width="1422" height="377" loading="lazy" decoding="async" alt="Closed-loop pipeline from behavior cloning policy through UMI-Prior to whole-body controller">
+            <span class="vector-figure-action">Open full-size SVG</span>
+          </a>
+          <figcaption>A 10 Hz behavior-cloning policy predicts EE trajectories, UMI-Prior replans whole-body references at 1.875 Hz, and a 50 Hz whole-body controller executes them with measured-state feedback.</figcaption>
+        </figure>
+        <div class="system-copy">
+          <article class="system-step">
+            <span class="system-step-number">1</span>
+            <h3>Behavior-cloning policy</h3>
+            <p>Wrist RGB observations and executed EE history produce a receding-horizon, bimanual end-effector plan plus gripper commands.</p>
+          </article>
+          <article class="system-step">
+            <span class="system-step-number">2</span>
+            <h3>UMI-Prior</h3>
+            <p>A masked flow-matching generator completes the sparse EE plan into two coordinated whole-body motion primitives.</p>
+          </article>
+          <article class="system-step">
+            <span class="system-step-number">3</span>
+            <h3>Whole-body controller</h3>
+            <p>A pretrained SONIC tracker follows the generated 29-DoF reference while execution feedback corrects the next plan.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-shell" id="motion-prior" aria-labelledby="prior-title">
+      <div class="wide-container">
+        <div class="section-heading">
+          <p class="section-kicker">Real-time motion completion</p>
+          <h2 class="section-title" id="prior-title">A task-agnostic prior for the missing coordination</h2>
+          <p class="section-deck">Retargeted mocap teaches whole-body structure; native UMI trajectories remain the only task-specific condition.</p>
+        </div>
+        <figure class="media-frame is-technical">
+          <a class="vector-figure-link" href="./static/images/umi-prior/prior-architecture.svg" target="_blank" rel="noopener" aria-label="Open full-size SVG: UMI-Prior architecture (opens in a new tab)">
+            <img src="./static/images/umi-prior/prior-architecture.svg" width="1693" height="655" loading="lazy" decoding="async" alt="UMI-Prior training and online two-primitive generation architecture">
+            <span class="vector-figure-action">Open full-size SVG</span>
+          </a>
+          <figcaption>During training, retargeted motion supplies both EE conditions and whole-body targets. Online, policy-predicted EE commands and measured body history drive two-primitive rollout and feedback-based replanning.</figcaption>
+        </figure>
+        <div class="editorial-container paper-copy flow-offset">
+          <p>
+            UMI-Prior models motion as short, fixed-length primitives. Each prediction receives eight history frames and generates 32 future frames at 30 Hz. A second application of the same generator extends the rollout, while look-ahead EE commands communicate future intent beyond the current primitive.
+          </p>
+          <p>
+            This explicit reference layer decouples the manipulation policy from the controller: the policy can focus on task progress, UMI-Prior supplies coordination, and the controller remains responsible for physical tracking.
+          </p>
+        </div>
+        <figure class="media-frame is-technical flow-offset">
+          <a class="vector-figure-link" href="./static/images/umi-prior/motion-generations.svg" target="_blank" rel="noopener" aria-label="Open full-size SVG: qualitative motion generations (opens in a new tab)">
+            <img src="./static/images/umi-prior/motion-generations.svg" width="519" height="262" loading="lazy" decoding="async" alt="Generated squat, dance, pick-up, and jog motions with diverse bimanual completions">
+            <span class="vector-figure-action">Open full-size SVG</span>
+          </a>
+          <figcaption>Qualitative generations span squat, dance, pick-up, and jog, with diverse whole-body completions that preserve the commanded dual-hand trajectories.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section-shell is-mist" id="execution" aria-labelledby="execution-title">
+      <div class="editorial-container">
+        <div class="section-heading">
+          <p class="section-kicker">Reference completion and execution</p>
+          <h2 class="section-title" id="execution-title">Built for online replanning</h2>
+          <p class="section-deck">Look-ahead improves offline motion fidelity, while feedback reduces whole-body execution error in simulation.</p>
+        </div>
+        <dl class="metric-strip">
+          <div class="metric-item">
+            <dt>Motion dataset</dt>
+            <dd>105 h</dd>
+          </div>
+          <div class="metric-item">
+            <dt>Motion rate</dt>
+            <dd>30 Hz</dd>
+          </div>
+          <div class="metric-item">
+            <dt>Planner rate</dt>
+            <dd>1.875 Hz</dd>
+          </div>
+          <div class="metric-item">
+            <dt>WBC rate</dt>
+            <dd>50 Hz</dd>
+          </div>
+        </dl>
+        <div class="paper-copy">
+          <p><strong>Tracker-free completion.</strong> The full EE-only model achieves 4.25 cm EE position error and a 0.0202 FID on the held-out motion test set. EE look-ahead improves most tracking and motion-quality metrics over the no-look-ahead ablation.</p>
+          <p><strong>Closed-loop execution.</strong> In simulated shelf pick-and-place, measured-state feedback reduces EE orientation error from 6.76 degrees to 4.97 degrees and root-relative MPJPE from 0.024 m to 0.017 m.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-shell" id="transfer" aria-labelledby="transfer-title">
+      <div class="wide-container">
+        <div class="section-heading">
+          <p class="section-kicker">Real-world transfer</p>
+          <h2 class="section-title" id="transfer-title">Four physical-robot tasks</h2>
+          <p class="section-deck">Each task uses 200 UMI demonstrations collected in about 90 minutes, then deploys the complete hierarchy on a 29-DoF G1 humanoid.</p>
+        </div>
+        <dl class="metric-strip">
+          <div class="metric-item is-positive">
+            <dt>Drawer closing</dt>
+            <dd>90%</dd>
+          </div>
+          <div class="metric-item is-positive">
+            <dt>Shelf PnP</dt>
+            <dd>80%</dd>
+          </div>
+          <div class="metric-item">
+            <dt>Ball toss</dt>
+            <dd>Qual.</dd>
+          </div>
+          <div class="metric-item">
+            <dt>Loco-PnP</dt>
+            <dd>Qual.</dd>
+          </div>
+        </dl>
+
+        <div class="task-grid">
+          <article class="task-card">
+            <div class="task-media">
+              <video controls muted loop playsinline preload="none" width="960" height="540" poster="./static/images/umi-prior/drawer.avif" data-autoplay-video aria-label="Drawer closing demonstration">
+                <source src="./static/videos/drawer.m4v" type="video/mp4">
+              </video>
+            </div>
+            <div class="task-body">
+              <h3>Drawer closing</h3>
+              <span class="task-result is-positive">90% success &middot; 10 trials</span>
+              <p>The robot follows the EE plan to reach the handle, lower its body, and close the drawer while maintaining balance.</p>
+            </div>
+          </article>
+
+          <article class="task-card">
+            <div class="task-media">
+              <video controls muted loop playsinline preload="none" width="960" height="540" poster="./static/images/umi-prior/shelf.avif" data-autoplay-video aria-label="Shelf pick-and-place demonstration">
+                <source src="./static/videos/shelf.m4v" type="video/mp4">
+              </video>
+            </div>
+            <div class="task-body">
+              <h3>Shelf pick-and-place</h3>
+              <span class="task-result is-positive">80% success &middot; 10 trials</span>
+              <p>The robot transfers a bottle from the lower shelf to the upper shelf by coordinating manipulation across different working heights.</p>
+            </div>
+          </article>
+
+          <article class="task-card">
+            <div class="task-media">
+              <video controls muted loop playsinline preload="none" width="960" height="540" poster="./static/images/umi-prior/toss.avif" data-autoplay-video aria-label="Ball toss demonstration">
+                <source src="./static/videos/ball-toss.m4v" type="video/mp4">
+              </video>
+            </div>
+            <div class="task-body">
+              <h3>Ball toss</h3>
+              <span class="task-result">Qualitative result</span>
+              <p>A dynamic, timed release tests whether the hierarchy can coordinate high-speed whole-body motion beyond quasi-static manipulation.</p>
+            </div>
+          </article>
+
+          <article class="task-card">
+            <div class="task-media">
+              <video controls muted loop playsinline preload="none" width="960" height="540" poster="./static/images/umi-prior/loco-pnp.avif" data-autoplay-video aria-label="Loco-PnP demonstration">
+                <source src="./static/videos/loco-pnp.m4v" type="video/mp4">
+              </video>
+            </div>
+            <div class="task-body">
+              <h3>Loco-PnP</h3>
+              <span class="task-result">Qualitative result</span>
+              <p>The robot walks to the table and performs pick-and-place, exposing the remaining gap between kinematic feasibility and controller dynamics.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-shell is-night" id="citation" aria-labelledby="citation-title">
+      <div class="editorial-container">
+        <div class="section-heading is-left">
+          <p class="section-kicker">Citation</p>
+          <h2 class="section-title" id="citation-title">UMI-Prior</h2>
+          <p class="section-deck">The author list and public artifact links will be updated after anonymous review.</p>
+        </div>
+        <pre class="bibtex"><code>@article{anonymous2027umiprior,
+  title   = {UMI-Prior: Transfer UMI Manipulation Skill to Humanoid
+             Whole-Body Manipulation via Real-Time Motion Generation},
+  author  = {Anonymous Authors},
+  year    = {2027},
+  note    = {Under review}
+}</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      Website adapted from the
+      <a href="https://github.com/umi-on-legs/umi-on-legs.github.io">UMI on Legs template</a>,
+      itself modified from <a href="https://nerfies.github.io/">Nerfies</a>.
+    </p>
+    <p>
+      Template content is shared under
+      <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+    </p>
+  </footer>
+</body>
+</html>
