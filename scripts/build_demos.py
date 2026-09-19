@@ -42,7 +42,7 @@ SOURCES = {
 # Start and end times in the original recording; None keeps the remainder.
 CLIP_WINDOWS = {
     "toss-1": (0, 12),
-    "toss-2": (0, 10),
+    "toss-2": (2, 7),
     "toss-3": (0, 12),
     "loco-pnp-1": (15, None),
     "loco-pnp-2": (3, None),
