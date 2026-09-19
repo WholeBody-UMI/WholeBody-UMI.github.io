@@ -26,7 +26,7 @@
   --color-cyan-04: rgba(66, 213, 255, 0.04);
   --color-positive-10: rgba(8, 113, 80, 0.1);
 
-  --type-display: clamp(4rem, 12vw, 10rem);
+  --type-display: clamp(3rem, 8vw, 7rem);
   --type-hero-subtitle: clamp(1.45rem, 4vw, 3.4rem);
   --type-section: clamp(2rem, 4vw, 3.25rem);
   --type-subsection: clamp(1.25rem, 2.4vw, 1.75rem);
@@ -340,6 +340,57 @@ video {
   opacity: 0.84;
 }
 
+.project-authors,
+.project-affiliations {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: var(--space-6);
+  row-gap: var(--space-2);
+  text-shadow: var(--shadow-title);
+}
+
+.project-authors {
+  margin-block-start: var(--space-8);
+  font-size: var(--type-lead);
+  font-weight: 600;
+}
+
+.project-affiliations {
+  margin-block-start: var(--space-3);
+  font-size: var(--type-small);
+  color: var(--color-white-94);
+}
+
+.project-authors span,
+.project-affiliations span {
+  white-space: nowrap;
+}
+
+.project-authors sup,
+.project-affiliations sup {
+  margin-inline-start: 0.15em;
+  font-size: 0.65em;
+}
+
+.resource-pending {
+  gap: var(--space-2);
+  cursor: default;
+}
+
+.resource-pending small {
+  font-size: 0.65rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.resource-button.button:disabled {
+  color: var(--color-white-76);
+  background: var(--color-night-soft);
+  transform: none;
+  box-shadow: none;
+}
+
 .publication-links {
   display: flex;
   flex-wrap: wrap;
@@ -353,6 +404,7 @@ video {
   padding-inline: var(--space-4);
   border: 1px solid transparent;
   border-radius: var(--radius-control);
+  font: inherit;
   font-weight: 700;
   transition:
     color var(--transition-micro),
@@ -689,6 +741,10 @@ video {
   border-radius: var(--radius-media);
 }
 
+.motion-diversity {
+  grid-column: 1 / -1;
+}
+
 .task-card .task-media {
   aspect-ratio: 16 / 9;
   overflow: hidden;
@@ -700,7 +756,54 @@ video {
 .task-card .task-media video {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+}
+
+.demo-slide {
+  height: 100%;
+}
+
+.demo-slide[hidden],
+.carousel-controls[hidden] {
+  display: none;
+}
+
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+  border-block-end: 1px solid var(--color-line);
+}
+
+.carousel-arrow {
+  flex: 0 0 2.75rem;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 1.35rem;
+  cursor: pointer;
+}
+
+.carousel-arrow:hover {
+  color: var(--color-cobalt-dark);
+  border-color: var(--color-cobalt);
+  background: var(--color-mist);
+}
+
+.carousel-status {
+  color: var(--color-ink-soft);
+  font-size: var(--type-small);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
 .task-card .task-media picture {

@@ -1,6 +1,6 @@
-# UMI-Prior Website Design System
+# Whole-Body UMI Website Design System
 
-This site adapts the public `umi-on-legs.github.io` academic-project template at commit `4aa985b61444492b6a7eb6318a0ba13acb7a1258`. It preserves the template's Bulma-style semantic layout vocabulary through a small local CSS subset; the content, media, color system, and responsive behavior are specific to UMI-Prior.
+This site adapts the public `umi-on-legs.github.io` academic-project template at commit `4aa985b61444492b6a7eb6318a0ba13acb7a1258`. It preserves the template's Bulma-style semantic layout vocabulary through a small local CSS subset; the content, media, color system, and responsive behavior are specific to Whole-Body UMI.
 
 ## 1. Atmosphere & Identity
 
@@ -31,7 +31,7 @@ Accent color is reserved for links, focus, quantitative highlights, and active n
 
 | Level | Token | Size | Weight | Line Height | Usage |
 |---|---|---:|---:|---:|---|
-| Display | `--type-display` | `clamp(4rem, 12vw, 10rem)` | 700 | 0.9 | `UMI-Prior` hero wordmark |
+| Display | `--type-display` | `clamp(3rem, 8vw, 7rem)` | 700 | 0.9 | `Whole-Body UMI` hero wordmark |
 | Hero subtitle | `--type-hero-subtitle` | `clamp(1.45rem, 4vw, 3.4rem)` | 600 | 1.08 | Full paper subtitle |
 | Section title | `--type-section` | `clamp(2rem, 4vw, 3.25rem)` | 700 | 1.1 | Primary section headings |
 | Subsection | `--type-subsection` | `clamp(1.25rem, 2.4vw, 1.75rem)` | 700 | 1.25 | Cards and subsection headings |
@@ -89,7 +89,8 @@ Maximum editorial width is 960px; wide technical media may expand to 1180px. The
 ### Media Frame
 - **Structure**: figure containing image or video and optional caption.
 - **Variants**: wide technical figure, task tile, hero background.
-- **Asset policy**: paper figures are served as SVG so text and line art stay sharp at any zoom; photographic robot demonstrations remain native video or raster posters because their source pixels are not vector data. Task demos preserve the complete source duration and use 16:9 encodes; the hero cover may use a shorter loop.
+- **Asset policy**: paper figures are served as SVG so text and line art stay sharp at any zoom; photographic robot demonstrations remain native video or raster posters because their source pixels are not vector data. Task demos use 16:9 encodes with source-time edits defined in `scripts/build_demos.py`: Ball Toss is capped at 12 seconds (10 seconds for the second recording); Locomotion Pick-and-Place starts at 15 s, 3 s, and 3 s for recordings 1–3, and recording 4 ends at 24 s. The hero cover may use a shorter loop.
+- **Hero montage**: original sticker-free human, simulation, and robot footage is arranged as four task triptychs (drawer, shelf, toss, locomotion pick-and-place). Desktop uses a 1920×1080, six-column montage; mobile stacks the triptychs in a 720×1620 portrait video. Both use silent H.264 loops at 30 fps, 1.5× playback, and matching JPEG posters. Rebuild with `python3 scripts/build_hero.py --material ../material` (FFmpeg required; original footage stays outside the website).
 - **States**: video play/pause is driven by viewport visibility; native controls remain available outside autoplay hero.
 - **Accessibility**: meaningful `alt`, captions, fixed aspect ratio, no unexpected audio.
 - **Motion**: media itself does not animate as decoration; playback communicates the robot behavior.
@@ -112,10 +113,10 @@ Maximum editorial width is 960px; wide technical media may expand to 1180px. The
 ### Task Card
 - **Structure**: media frame, task title, result badge, explanatory copy.
 - **Variants**: quantitative and qualitative.
-- **States**: links within cards use Resource Button states; card itself is not falsely interactive.
+- **States**: each task is an independent carousel with previous/next buttons, a live slide count, wraparound, and left/right keyboard navigation on its controls. Hidden videos pause and release their media source; additional video sources load only when selected. Original AAC audio is retained in robot demos, with mute and volume carried across slides. Reduced-motion users start playback through native controls.
 - **Accessibility**: heading, result text, and caption remain in the DOM.
 - **Motion**: none on the non-interactive card.
-- **Layout**: two-column responsive grid.
+- **Layout**: two-column responsive grid. Drawer, shelf, and locomotion pick-and-place have four independent recordings each; toss has three. Videos preserve source framing in 1280×720 H.264. Ball Toss is limited to the first 12 seconds, with the second recording capped at 10 seconds (shorter recordings stay unchanged); Locomotion Pick-and-Place recordings 1–3 omit the first 15 s, 3 s, and 3 s respectively, while recording 4 keeps the first 24 s. Drawer and shelf recordings retain their complete duration. Rebuild with `python3 scripts/build_demos.py --material ../material`.
 
 ## 6. Motion & Interaction
 
@@ -150,5 +151,21 @@ Strategy: mixed, following the source template's full-bleed video/overlay plus p
 
 | Item | Location | Why accepted | Owner / Exit |
 |---|---|---|---|
-| Anonymous author identity | Hero metadata | The paper is in anonymous-review form | Replace after de-anonymization |
-| Code/arXiv links omitted | Resource cluster | No public URLs are present in the manuscript | Add when public artifacts exist |
+| Downloaded manuscript remains anonymous | Paper PDF | The current source PDF is the anonymous submission; website authors are shown as explicitly requested | Replace the PDF when a named manuscript is ready |
+| GitHub/arXiv links pending | Resource cluster | Disabled “Coming soon” buttons reserve both resources without fabricated URLs | Replace with links when public artifacts exist |
+
+## 9. Paper Content
+
+Website copy follows `../ICRA2027-UMI-Prior/PAPER.tex` and its section sources, with author names taken from the commented author declaration. The user supplied the four affiliation names. Figures are SVG exports of the current manuscript figure PDFs; the Paper button serves an unchanged copy of `PAPER.pdf` as `static/Whole-Body-UMI.pdf`. Reported real-robot results are 9/10, 8/10, 3/10, and 4/10; the carousel recordings are illustrative clips, not a complete record of those evaluation trials.
+
+## 10. Simulation and Local Playback
+
+The Simulation section uses the same carousel component for four task-conditioned motions and four motion-prior examples, with Motion Diversity in a separate full-width player. Simulation clips preserve their native resolution, duration, and source audio state (these recordings are silent). Rebuild with `python3 scripts/build_simulations.py --material ../material`. The Generation and Execution Results section is limited to two concise result paragraphs.
+
+Run `python3 scripts/serve.py` for local preview on port 8765. Its byte-range support allows native seeking before a complete video download; `python -m http.server` does not provide this behavior. Run `python3 -m unittest discover -s tests` to validate byte ranges, suffix ranges, HEAD, and unsatisfiable requests.
+
+Motion Diversity uses `../material/05_diversity.mp4`, the revised source, rather than `sim_demos/motion_prior_test/05_diversity.mp4`. It is compressed from the revised original source with H.264 CRF 20, preserving resolution, frame rate, and timing, into `static/videos/simulation/diversity-stable.mp4` (1920×1080, 30 fps). The standalone card spans both desktop columns and stacks normally on mobile.
+
+The UMI Skill Transfer figure uses `wb-umi-teaser-clean.svg`: its four human collection panels are extracted from the original unmasked videos. The remaining SVG panels, geometry, and labels are preserved. Rebuild with `python3 scripts/build_teaser.py --material ../material`; the manuscript and source SVG remain unchanged.
+
+Motion-Prior Samples are H.264 web encodes (CRF 20, a keyframe at most every 60 frames). Their source resolution, 30 fps, frame count, duration, and motion timing are unchanged; no interpolation or motion smoothing is applied. This reduces the four files from approximately 85 MiB to 30 MiB. The hero pauses when outside the viewport to avoid decoding it while readers watch other demonstrations. No alternate smoother source for the four existing samples was found in the material folder or current presentation.
