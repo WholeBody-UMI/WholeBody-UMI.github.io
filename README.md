@@ -1,74 +1,13 @@
-# Whole-Body UMI website
+# Whole-Body UMI
 
-This is a static website; no build step or package installation is required.
+### Transferring UMI Manipulation Skills to Humanoid Whole-Body Manipulation via Real-Time Motion Generation
 
-```sh
-python3 scripts/serve.py
-```
+[Project Website](https://wholebody-umi.github.io/WholeBody-UMI_website/) · [Paper](static/Whole-Body-UMI.pdf) · Code (coming soon) · arXiv (coming soon)
 
-Open http://localhost:8765. Use Ctrl+C to stop the server. If that port is
-already in use, stop the previous preview or pass `--port 8766`.
+**Yuxuan Nai**<sup>1,2</sup>, **Leixin Chang**<sup>1</sup>, **Liangjing Yang**<sup>1</sup>, **Shuo Yang**<sup>3</sup>, **Zhongyu Li**<sup>2,4</sup>
 
-Use this server instead of `python3 -m http.server`: it supports HTTP byte-range
-requests so videos can seek before downloading completely. Production hosting
-should likewise support `Range` requests with `206 Partial Content` responses.
+<sup>1</sup> Zhejiang University · <sup>2</sup> Hongkong EAI Lab · <sup>3</sup> Mondo Tech. · <sup>4</sup> CUHK
 
-Videos autoplay muted. Use the player's speaker control to enable the original
-audio; the sound and volume setting carries over when switching recordings in
-the same carousel. Simulation recordings have no source audio.
+Whole-Body UMI transfers UMI manipulation skills to humanoid robots through real-time whole-body motion generation, without body trackers or task-specific whole-body demonstrations.
 
-To regenerate robot recordings and posters from the local source footage:
-
-```sh
-python3 scripts/build_demos.py --material ../material
-python3 scripts/build_simulations.py --material ../material
-```
-
-FFmpeg and FFprobe are required for media preparation, but not for serving.
-
-Motion-prior samples use lighter web encodes with the original frame rate and motion timing. To rebuild only these four files, run `python3 scripts/build_simulations.py --material ../material --motion-only`.
-
-## Video storage and publishing
-
-Keep the final web MP4s and posters in this repository for static hosting:
-
-- `static/videos/demos/`: trimmed real-world demos, including their original audio.
-- `static/videos/simulation/`: compressed simulations, including the revised Motion Diversity source.
-- `static/videos/hero-montage*.mp4`: desktop and mobile covers.
-- `static/images/umi-prior/`: posters and paper figures.
-
-Keep original footage in `../material`, outside this repository. Store long-form
-presentation videos on YouTube and add their links or embeds when available.
-Short demos continue to use native video controls and carousel navigation.
-Commit final exports rather than every intermediate encode. Git retains old
-versions of committed videos, so replacing a file does not remove its history.
-
-Before publishing, run this read-only check for missing video/poster references,
-unused videos, and individual videos over 50 MiB:
-
-```sh
-python3 scripts/check_media.py
-```
-
-All simulations are encoded from original sources using H.264 CRF 20, retaining
-resolution, frame rate, and timing, with fast-start MP4 metadata. Rebuild only
-selected clips with:
-
-```sh
-python3 scripts/build_simulations.py --material ../material --only drawer shelf toss locomotion-pick-and-place diversity-stable
-```
-
-After replacing a video, update its `?v=` query in `index.html` to refresh browser
-caches. Videos preload nothing; hidden carousel slides have no `src` until selected,
-and automatic playback pauses outside the viewport. The cover loads only the
-desktop or mobile version appropriate to the viewport.
-
-Unused legacy `.m4v` files were archived outside this website at
-`../material/website-legacy-videos/`. They are not needed for deployment.
-
-## GitHub Pages
-
-In the repository's Settings → Pages, select **Deploy from a branch**, then
-**main** and **/ (root)**, and save. The root `.nojekyll` file tells Pages to
-serve this static site directly. Subsequent pushes to `main` publish updates.
-Use the deployment URL shown in Pages settings after the deployment succeeds.
+Explore real-world demonstrations of drawer closing, shelf pick-and-place, ball toss, and locomotion pick-and-place, alongside simulation results and motion diversity, on the project website.
