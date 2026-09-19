@@ -51,20 +51,28 @@ def main():
             f"pad=320:540:2:4:color=0xe8edf1,format=yuv420p[v{index}]"
         )
     layout = "|".join(f"{index % 6 * 320}_{index // 6 * 540}" for index in range(12))
-    filters.append("".join(f"[v{i}]" for i in range(12)) + f"xstack=inputs=12:layout={layout}[out]")
+    filters.append("".join(f"[v{i}]" for i in range(12)) + f"xstack=inputs=12:layout={layout}[montage]")
+    filters.extend([
+        "[montage]split=2[wide][portrait]",
+        "[wide]scale=1280:720:flags=lanczos[desktop]",
+        "[portrait]split=4[a][b][c][d]",
+        "[a]crop=960:540:0:0[a0]", "[b]crop=960:540:960:0[b0]",
+        "[c]crop=960:540:0:540[c0]", "[d]crop=960:540:960:540[d0]",
+        "[a0][b0][c0][d0]vstack=inputs=4,scale=480:1080:flags=lanczos[mobile]",
+    ])
     desktop = video_dir / "hero-montage.mp4"
-    run([*inputs, "-filter_complex", ";".join(filters), "-map", "[out]", "-an",
-         "-t", str(DURATION), "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-         "-movflags", "+faststart", str(desktop)])
-    # Preserve all four triptychs on portrait screens, in reading order.
     mobile = video_dir / "hero-montage-mobile.mp4"
-    run(["-i", str(desktop), "-filter_complex",
-         "[0:v]split=4[a][b][c][d];"
-         "[a]crop=960:540:0:0[a0];[b]crop=960:540:960:0[b0];"
-         "[c]crop=960:540:0:540[c0];[d]crop=960:540:960:540[d0];"
-         "[a0][b0][c0][d0]vstack=inputs=4,scale=720:1620:flags=lanczos[out]",
-         "-map", "[out]", "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "19",
-         "-movflags", "+faststart", str(mobile)])
+    codec = ["-an", "-t", str(DURATION), "-c:v", "libx264", "-preset", "slow",
+             "-crf", "24", "-threads", "4", "-pix_fmt", "yuv420p", "-g", "60",
+             "-movflags", "+faststart"]
+    # Encode both layouts from the same montage; cap bitrate for network playback.
+    desktop_temp = desktop.with_suffix(".encoding.mp4")
+    mobile_temp = mobile.with_suffix(".encoding.mp4")
+    run([*inputs, "-filter_complex_threads", "4", "-filter_complex", ";".join(filters),
+         "-map", "[desktop]", *codec, "-maxrate", "1800k", "-bufsize", "3600k", str(desktop_temp),
+         "-map", "[mobile]", *codec, "-maxrate", "1100k", "-bufsize", "2200k", str(mobile_temp)])
+    desktop_temp.replace(desktop)
+    mobile_temp.replace(mobile)
     for video, name in [(desktop, "hero-montage-desktop"), (mobile, "hero-montage-mobile")]:
         run(["-i", str(video), "-frames:v", "1", "-q:v", "2", str(image_dir / f"{name}.jpg")])
 

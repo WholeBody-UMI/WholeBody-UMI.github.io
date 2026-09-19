@@ -40,23 +40,21 @@ if (heroVideo instanceof HTMLVideoElement) {
   if (!reduceMotion.matches) {
     // Playback is controlled by visibility, including after the source loads.
     heroVideo.autoplay = false;
-    let heroIsVisible = false;
+    heroVideo.muted = true;
     const heroObserver = new IntersectionObserver(([entry]) => {
-      heroIsVisible = entry.isIntersecting;
-      if (heroIsVisible && heroVideo.getAttribute("src")) {
+      if (entry.isIntersecting) {
+        if (!heroVideo.getAttribute("src")) {
+          heroVideo.src = compactViewport
+            ? heroVideo.dataset.mobileSrc || ""
+            : heroVideo.dataset.desktopSrc || "";
+          heroVideo.load();
+        }
         void heroVideo.play().catch(() => undefined);
       } else {
         heroVideo.pause();
       }
     });
     heroObserver.observe(heroVideo);
-    window.setTimeout(() => {
-      heroVideo.src = compactViewport
-        ? heroVideo.dataset.mobileSrc || ""
-        : heroVideo.dataset.desktopSrc || "";
-      heroVideo.load();
-      if (heroIsVisible) void heroVideo.play().catch(() => undefined);
-    }, 1_500);
   }
 }
 
