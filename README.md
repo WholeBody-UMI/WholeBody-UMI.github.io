@@ -65,3 +65,10 @@ desktop or mobile version appropriate to the viewport.
 
 Unused legacy `.m4v` files were archived outside this website at
 `../material/website-legacy-videos/`. They are not needed for deployment.
+
+## GitHub Pages
+
+In the repository's Settings → Pages, select **Deploy from a branch**, then
+**main** and **/ (root)**, and save. The root `.nojekyll` file tells Pages to
+serve this static site directly. Subsequent pushes to `main` publish updates.
+Use the deployment URL shown in Pages settings after the deployment succeeds.
