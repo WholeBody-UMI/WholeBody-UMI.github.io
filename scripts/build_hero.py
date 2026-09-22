@@ -1,8 +1,8 @@
-"""Build the sticker-free hero from original footage (requires ffmpeg).
+"""Build the anonymous hero with smaller tracked face stickers (requires ffmpeg).
 
 Usage: python3 scripts/build_hero.py --material ../material
-The four task groups follow the reference GIF: drawer, shelf, toss, loco-PnP.
-Each group contains human collection, simulation, and robot execution.
+The four task groups are drawer, shelf, toss, and loco-PnP. Each group contains
+human collection with a face-covering sticker, simulation, and robot execution.
 """
 
 import argparse
@@ -27,10 +27,45 @@ SOURCES = [
     ("sim_demos/walk-pnp-bottle.mp4", "crop=400:674:320:20"),
     ("video/Loco-PnP/walk_pnp_0818.MOV", "crop=632:1064:900:8"),
 ]
+STICKER = ROOT / "scripts/assets/anon-cat-sticker.png"
+STICKER_WIDTH = 52
+STICKER_HEIGHT = round(STICKER_WIDTH * 184 / 195)
+
+# Human head centers sampled once per second from the source footage.
+# Coordinates use the 960x540 montage space and are linearly interpolated.
+STICKER_TRACKS = [
+    [(55, 62), (69, 92), (65, 92), (62, 96), (66, 93), (68, 93),
+     (65, 105), (60, 100), (66, 100), (64, 81), (60, 79), (63, 91),
+     (58, 100), (62, 89), (64, 91), (66, 86), (65, 91), (64, 92),
+     (61, 101), (63, 89), (66, 82), (66, 90), (66, 90)],
+    [(550, 65), (568, 85), (570, 95), (572, 101), (569, 96), (572, 84),
+     (545, 79), (558, 77), (560, 81), (570, 81), (575, 89), (577, 89),
+     (550, 103), (563, 94), (574, 76), (570, 71), (570, 79), (568, 96),
+     (552, 101), (555, 101), (569, 96), (575, 91), (575, 91)],
+    [(58, 325), (70, 325), (70, 322), (68, 326), (69, 325), (70, 326),
+     (70, 324), (72, 328), (68, 328), (70, 330), (66, 332), (70, 328),
+     (58, 330), (66, 325), (70, 328), (70, 328), (69, 326), (70, 328),
+     (70, 332), (72, 330), (72, 325), (70, 327), (70, 327)],
+    [(552, 328), (538, 332), (535, 335), (538, 338), (538, 335), (540, 332),
+     (515, 352), (525, 348), (525, 345), (535, 344), (538, 350), (536, 345),
+     (508, 340), (522, 340), (530, 340), (523, 338), (535, 335), (535, 340),
+     (515, 350), (525, 355), (530, 347), (538, 338), (538, 338)],
+]
 
 
 def run(args):
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *args], check=True)
+
+
+def interpolated_expression(values, half_size):
+    """Return an FFmpeg expression interpolating keyframes at one-second intervals."""
+    expression = f"{values[-1] - half_size:.2f}"
+    for second in reversed(range(len(values) - 1)):
+        start = values[second] - half_size
+        delta = values[second + 1] - values[second]
+        segment = f"{start:.2f}+{delta:.2f}*(t-{second})"
+        expression = f"if(lt(t,{second + 1}),{segment},{expression})"
+    return expression
 
 
 def main():
@@ -39,6 +74,8 @@ def main():
     args = parser.parse_args()
     video_dir = ROOT / "static/videos"
     image_dir = ROOT / "static/images/umi-prior"
+    if not STICKER.is_file():
+        parser.error(f"Missing sticker: {STICKER}")
     inputs, filters = [], []
     for index, (source, crop) in enumerate(SOURCES):
         path = args.material / source
@@ -47,18 +84,27 @@ def main():
         inputs += ["-stream_loop", "-1", "-i", str(path)]
         filters.append(
             f"[{index}:v]setpts=(PTS-STARTPTS)/1.5,trim=duration={DURATION},"
-            f"fps=30,{crop},scale=316:532:flags=lanczos,setsar=1,"
-            f"pad=320:540:2:4:color=0xe8edf1,format=yuv420p[v{index}]"
+            f"fps=30,{crop},scale=158:266:flags=lanczos,setsar=1,"
+            f"pad=160:270:1:2:color=0xe8edf1,format=yuv420p[v{index}]"
         )
-    layout = "|".join(f"{index % 6 * 320}_{index // 6 * 540}" for index in range(12))
+    inputs += ["-loop", "1", "-i", str(STICKER)]
+    layout = "|".join(f"{index % 6 * 160}_{index // 6 * 270}" for index in range(12))
     filters.append("".join(f"[v{i}]" for i in range(12)) + f"xstack=inputs=12:layout={layout}[montage]")
+    filters.append(f"[12:v]scale={STICKER_WIDTH}:{STICKER_HEIGHT},split=4[st0][st1][st2][st3]")
+    current = "montage"
+    for index, track in enumerate(STICKER_TRACKS):
+        x = interpolated_expression([point[0] for point in track], STICKER_WIDTH / 2)
+        y = interpolated_expression([point[1] for point in track], STICKER_HEIGHT / 2)
+        output = f"anonymous{index}"
+        filters.append(f"[{current}][st{index}]overlay=x='{x}':y='{y}':eval=frame[{output}]")
+        current = output
     filters.extend([
-        "[montage]split=2[wide][portrait]",
+        f"[{current}]split=2[wide][portrait]",
         "[wide]scale=1280:720:flags=lanczos[desktop]",
         "[portrait]split=4[a][b][c][d]",
-        "[a]crop=960:540:0:0[a0]", "[b]crop=960:540:960:0[b0]",
-        "[c]crop=960:540:0:540[c0]", "[d]crop=960:540:960:540[d0]",
-        "[a0][b0][c0][d0]vstack=inputs=4,scale=480:1080:flags=lanczos[mobile]",
+        "[a]crop=480:270:0:0[a0]", "[b]crop=480:270:480:0[b0]",
+        "[c]crop=480:270:0:270[c0]", "[d]crop=480:270:480:270[d0]",
+        "[a0][b0][c0][d0]vstack=inputs=4[mobile]",
     ])
     desktop = video_dir / "hero-montage.mp4"
     mobile = video_dir / "hero-montage-mobile.mp4"
