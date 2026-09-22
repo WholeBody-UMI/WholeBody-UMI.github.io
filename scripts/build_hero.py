@@ -1,4 +1,4 @@
-"""Build the anonymous hero with smaller tracked face stickers (requires ffmpeg).
+"""Build the anonymous hero with calibrated head-covering stickers (requires ffmpeg).
 
 Usage: python3 scripts/build_hero.py --material ../material
 The four task groups are drawer, shelf, toss, and loco-PnP. Each group contains
@@ -6,6 +6,7 @@ human collection with a face-covering sticker, simulation, and robot execution.
 """
 
 import argparse
+import json
 from pathlib import Path
 import subprocess
 
@@ -28,44 +29,41 @@ SOURCES = [
     ("video/Loco-PnP/walk_pnp_0818.MOV", "crop=632:1064:900:8"),
 ]
 STICKER = ROOT / "scripts/assets/anon-cat-sticker.png"
-STICKER_WIDTH = 52
+STICKER_WIDTH = 68
 STICKER_HEIGHT = round(STICKER_WIDTH * 184 / 195)
-
-# Human head centers sampled once per second from the source footage.
-# Coordinates use the 960x540 montage space and are linearly interpolated.
-STICKER_TRACKS = [
-    [(55, 62), (69, 92), (65, 92), (62, 96), (66, 93), (68, 93),
-     (65, 105), (60, 100), (66, 100), (64, 81), (60, 79), (63, 91),
-     (58, 100), (62, 89), (64, 91), (66, 86), (65, 91), (64, 92),
-     (61, 101), (63, 89), (66, 82), (66, 90), (66, 90)],
-    [(550, 65), (568, 85), (570, 95), (572, 101), (569, 96), (572, 84),
-     (545, 79), (558, 77), (560, 81), (570, 81), (575, 89), (577, 89),
-     (550, 103), (563, 94), (574, 76), (570, 71), (570, 79), (568, 96),
-     (552, 101), (555, 101), (569, 96), (575, 91), (575, 91)],
-    [(58, 325), (70, 325), (70, 322), (68, 326), (69, 325), (70, 326),
-     (70, 324), (72, 328), (68, 328), (70, 330), (66, 332), (70, 328),
-     (58, 330), (66, 325), (70, 328), (70, 328), (69, 326), (70, 328),
-     (70, 332), (72, 330), (72, 325), (70, 327), (70, 327)],
-    [(552, 328), (538, 332), (535, 335), (538, 338), (538, 335), (540, 332),
-     (515, 352), (525, 348), (525, 345), (535, 344), (538, 350), (536, 345),
-     (508, 340), (522, 340), (530, 340), (523, 338), (535, 335), (535, 340),
-     (515, 350), (525, 355), (530, 347), (538, 338), (538, 338)],
-]
+# The opaque cat face lies below/right of the image center; transparent ears
+# must not be counted as coverage. Align the human head with that opaque core.
+STICKER_ANCHOR = (0.60 * STICKER_WIDTH, 0.62 * STICKER_HEIGHT)
+TRACK_FILE = ROOT / "scripts/assets/hero-head-tracks.json"
 
 
 def run(args):
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *args], check=True)
 
 
-def interpolated_expression(values, half_size):
-    """Return an FFmpeg expression interpolating keyframes at one-second intervals."""
-    expression = f"{values[-1] - half_size:.2f}"
-    for second in reversed(range(len(values) - 1)):
-        start = values[second] - half_size
-        delta = values[second + 1] - values[second]
-        segment = f"{start:.2f}+{delta:.2f}*(t-{second})"
-        expression = f"if(lt(t,{second + 1}),{segment},{expression})"
-    return expression
+def interpolated_expression(keyframes, axis, offset, fps):
+    """Interpolate output-frame coordinates, including adjacent frames at cuts.
+
+    Use a balanced expression tree to avoid FFmpeg's expression nesting limit.
+    Source-loop jumps have keyframes on both sides and never interpolate across
+    an entire sampling interval.
+    """
+    segments = []
+    for start, end in zip(keyframes, keyframes[1:]):
+        value = start[axis] + offset
+        slope = (end[axis] - start[axis]) * fps / (end[0] - start[0])
+        segments.append((end[0] / fps,
+                         f"{value:.4f}+{slope:.4f}*(t-{start[0] / fps:.8f})"))
+    segments.append((float("inf"), f"{keyframes[-1][axis] + offset:.4f}"))
+
+    def branch(items):
+        if len(items) == 1:
+            return items[0][1]
+        middle = len(items) // 2
+        return (f"if(lt(t,{items[middle - 1][0]:.8f}),"
+                f"{branch(items[:middle])},{branch(items[middle:])})")
+
+    return branch(segments)
 
 
 def main():
@@ -89,17 +87,22 @@ def main():
         )
     inputs += ["-loop", "1", "-i", str(STICKER)]
     layout = "|".join(f"{index % 6 * 160}_{index // 6 * 270}" for index in range(12))
-    filters.append("".join(f"[v{i}]" for i in range(12)) + f"xstack=inputs=12:layout={layout}[montage]")
     filters.append(f"[12:v]scale={STICKER_WIDTH}:{STICKER_HEIGHT},split=4[st0][st1][st2][st3]")
-    current = "montage"
-    for index, track in enumerate(STICKER_TRACKS):
-        x = interpolated_expression([point[0] for point in track], STICKER_WIDTH / 2)
-        y = interpolated_expression([point[1] for point in track], STICKER_HEIGHT / 2)
+    track_data = json.loads(TRACK_FILE.read_text())
+    tiles = [f"v{i}" for i in range(12)]
+    for index, track in enumerate(track_data["tracks"]):
+        x = interpolated_expression(track["keyframes"], 1,
+                                    -STICKER_ANCHOR[0], track_data["fps"])
+        y = interpolated_expression(track["keyframes"], 2,
+                                    -STICKER_ANCHOR[1], track_data["fps"])
         output = f"anonymous{index}"
-        filters.append(f"[{current}][st{index}]overlay=x='{x}':y='{y}':eval=frame[{output}]")
-        current = output
+        # Apply within the human tile so stickers cannot cover a neighboring robot.
+        filters.append(f"[v{index * 3}][st{index}]overlay=x='{x}':y='{y}':eval=frame[{output}]")
+        tiles[index * 3] = output
+    filters.append("".join(f"[{tile}]" for tile in tiles) +
+                   f"xstack=inputs=12:layout={layout}[montage]")
     filters.extend([
-        f"[{current}]split=2[wide][portrait]",
+        "[montage]split=2[wide][portrait]",
         "[wide]scale=1280:720:flags=lanczos[desktop]",
         "[portrait]split=4[a][b][c][d]",
         "[a]crop=480:270:0:0[a0]", "[b]crop=480:270:480:0[b0]",
