@@ -640,6 +640,20 @@ video {
   background: var(--color-night);
 }
 
+.youtube-frame iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+
+.youtube-fallback {
+  margin: var(--space-4) 0 0;
+  color: var(--color-ink-soft);
+  font-size: var(--type-small);
+  text-align: center;
+}
+
 .media-frame figcaption {
   padding: var(--space-3) var(--space-4);
   color: var(--color-ink-soft);

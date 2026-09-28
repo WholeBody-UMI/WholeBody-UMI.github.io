@@ -1,4 +1,4 @@
-const sectionIds = ["overview", "system", "motion-prior", "simulation", "transfer", "citation"];
+const sectionIds = ["video", "overview", "system", "motion-prior", "simulation", "transfer", "citation"];
 const sectionLinks = [...document.querySelectorAll('.anchor-tabs a[href^="#"]')];
 
 const setActiveSection = (sectionId) => {
