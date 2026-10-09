@@ -4,7 +4,7 @@
 
 [Project Website](https://wholebody-umi.github.io/) · [Paper](static/Whole-Body-UMI.pdf) · [arXiv](https://arxiv.org/abs/2609.22829) · Code (coming soon)
 
-**Yuxuan Nai<sup>1,2</sup>, Leixin Chang<sup>1</sup>, Liangjing Yang<sup>1</sup>, Shuo Yang<sup>3</sup>, Zhongyu Li<sup>2,4</sup>**
+**[Yuxuan Nai](https://lytingn.github.io/)<sup>1,2</sup>, [Leixin Chang](https://leixinjonaschang.github.io/)<sup>1</sup>, [Liangjing Yang](https://zjui.intl.zju.edu.cn/en/node/783)<sup>1</sup>, [Shuo Yang](https://shuoyangrobotics.github.io/)<sup>3</sup>, [Zhongyu Li](https://zyliatzju.github.io/)<sup>2,4</sup>**
 
 <sup>1</sup> Zhejiang University · <sup>2</sup> Hong Kong Embodied AI Lab · <sup>3</sup> Mondo Robotics · <sup>4</sup> The Chinese University of Hong Kong
 
