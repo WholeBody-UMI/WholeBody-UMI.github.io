@@ -2,7 +2,7 @@
 
 ### Transferring UMI Manipulation Skills to Humanoid Whole-Body Manipulation via Real-Time Motion Generation
 
-[Project Website](https://wholebody-umi.github.io/) · [Paper](static/Whole-Body-UMI.pdf) · [arXiv](https://arxiv.org/abs/2609.22829) · Code (coming soon)
+[Project Website](https://wholebody-umi.github.io/) · [Paper](static/Whole-Body-UMI.pdf) · [arXiv](https://arxiv.org/abs/2609.22829) · [Code](https://github.com/WholeBody-UMI/WholeBody-UMI/tree/main)
 
 **[Yuxuan Nai](https://lytingn.github.io/)<sup>1,2</sup>, [Leixin Chang](https://leixinjonaschang.github.io/)<sup>1</sup>, [Liangjing Yang](https://zjui.intl.zju.edu.cn/en/node/783)<sup>1</sup>, [Shuo Yang](https://shuoyangrobotics.github.io/)<sup>3</sup>, [Zhongyu Li](https://zyliatzju.github.io/)<sup>2,4</sup>**
 
